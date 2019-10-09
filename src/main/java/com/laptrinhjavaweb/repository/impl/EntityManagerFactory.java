@@ -10,10 +10,10 @@ public class EntityManagerFactory {
     static ResourceBundle resourceBundle =ResourceBundle.getBundle("db");
     public static Connection getConnection(){
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            String url = "jdbc:mysql://localhost:3306/estatejdbc8_2019_v2";
-            String username = "root";
-            String password = "1234";
+            Class.forName(resourceBundle.getString("driverName"));
+            String url = resourceBundle.getString("url");
+            String username = resourceBundle.getString("username");
+            String password = resourceBundle.getString("password");
             return DriverManager.getConnection(url,username,password);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
