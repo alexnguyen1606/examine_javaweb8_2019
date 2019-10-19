@@ -15,16 +15,7 @@ public class BaseEntity  {
     private Date modifiedDate;
     @Column(name = "modifiedby")
     private String modifiedBy;
-    @Column(name = "status")
-    private Integer status;
 
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
 
     public Long getId() {
         return id;

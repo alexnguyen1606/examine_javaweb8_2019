@@ -1,13 +1,26 @@
 package com.laptrinhjavaweb.service.impl;
 
 import com.laptrinhjavaweb.builder.BuildingSearchBuilder;
+import com.laptrinhjavaweb.converter.BuildingConverter;
 import com.laptrinhjavaweb.dto.BuildingDTO;
+import com.laptrinhjavaweb.entity.BuildingEntity;
 import com.laptrinhjavaweb.paging.Pageable;
+import com.laptrinhjavaweb.repository.impl.BuildingRepository;
 import com.laptrinhjavaweb.service.IBuildingService;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BuildingService implements IBuildingService {
+    private BuildingConverter converter;
+    private BuildingRepository buildingRepository;
+
+    public BuildingService() {
+        this.buildingRepository = new BuildingRepository();
+        this.converter = new BuildingConverter();
+    }
+
     @Override
     public List<BuildingDTO> findAll(BuildingSearchBuilder fieldSearch, Pageable pageable) {
         return null;
@@ -15,22 +28,33 @@ public class BuildingService implements IBuildingService {
 
     @Override
     public List<BuildingDTO> findAll(Pageable pageable) {
-        return null;
+        return buildingRepository.findAll(pageable).stream()
+                .map(item-> converter.covertToDTO(item)).collect(Collectors.toList());
     }
 
     @Override
     public List<BuildingDTO> findAll() {
-        return null;
+        return buildingRepository.findAll().stream()
+                .map(item-> converter.covertToDTO(item)).collect(Collectors.toList());
     }
 
     @Override
     public BuildingDTO save(BuildingDTO buildingDTO) {
-        return null;
+        BuildingEntity buildingEntity = converter.covertToEntity(buildingDTO);
+        buildingEntity.setCreatedBy("abc");
+        buildingEntity.setCreatedDate(new Date());
+        buildingEntity.setModifiedDate(new Date());
+        Long id = buildingRepository.save(buildingEntity);
+        return findOne(id);
     }
 
     @Override
     public BuildingDTO findOne(Long id) {
-        return null;
+        if (id==null){
+            return new BuildingDTO();
+        }else {
+            return converter.covertToDTO(buildingRepository.findById(id));
+        }
     }
 
     @Override

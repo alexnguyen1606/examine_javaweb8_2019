@@ -13,7 +13,16 @@ public class UserEntity extends BaseEntity{
     private String passWord;
     @Column(name = "fullname")
     private String fullName;
+    @Column(name = "status")
+    private Integer status;
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
 
     public String getUserName() {
         return userName;

@@ -19,7 +19,16 @@ public class CustomerEntity extends BaseEntity {
     private String request;
     @Column(name = "note")
     private String note;
+    @Column(name = "status")
+    private Integer status;
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
     public String getFullName() {
         return fullName;
     }
