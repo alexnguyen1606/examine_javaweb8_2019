@@ -33,7 +33,7 @@ public class SimpleJpaRepository<T>  implements JpaRepository<T> {
             Table tableClass = (Table) zClass.getAnnotation(Table.class);
             tableName = tableClass.name();
         }
-        StringBuilder sql = new StringBuilder("select * from "+ tableName+"AS A WHERE 1=1");
+        StringBuilder sql = new StringBuilder("select * from "+ tableName);
 
         System.out.println(sql.toString());
         ResultSet resultSet =null;
@@ -149,6 +149,24 @@ public class SimpleJpaRepository<T>  implements JpaRepository<T> {
 
     @Override
     public void deleteById(Long id) {
+        String tableName = "";
+        if (zClass.isAnnotationPresent(Table.class) && zClass.isAnnotationPresent(Entity.class)) {
+            Table table = (Table) zClass.getAnnotation(Table.class);
+            tableName = table.name();
+        }
+        String sql = "DELETE FROM "+tableName+" WHERE id = ?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = EntityManagerFactory.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.prepareStatement(sql);
+            statement.setObject(1,id);
+            statement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 

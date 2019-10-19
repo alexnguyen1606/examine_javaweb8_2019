@@ -79,6 +79,9 @@ public class BuildingService implements IBuildingService {
 
     @Override
     public List<BuildingDTO> delete(Long[] ids) {
-        return null;
+        for (Long id : ids){
+            buildingRepository.deleteById(id);
+        }
+        return findAll();
     }
 }
