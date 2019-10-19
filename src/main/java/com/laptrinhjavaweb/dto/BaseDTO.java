@@ -17,6 +17,15 @@ public class BaseDTO {
     private Integer status;
     private Integer page;
     private Integer limit;
+    private Long[] idDelete = new Long[]{};
+
+    public Long[] getIdDelete() {
+        return idDelete;
+    }
+
+    public void setIdDelete(Long[] idDelete) {
+        this.idDelete = idDelete;
+    }
 
     public Integer getPage() {
         return page;

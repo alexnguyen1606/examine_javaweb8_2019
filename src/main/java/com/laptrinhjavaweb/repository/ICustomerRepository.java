@@ -9,6 +9,6 @@ import java.util.Map;
 
 public interface ICustomerRepository extends JpaRepository<CustomerEntity> {
 
-    List<CustomerEntity> findAll(Pageable pageable);
+
     List<CustomerEntity> findAll(Map<String,Object> params, Pageable pageable, CustomerSearchBuilder builder);
 }

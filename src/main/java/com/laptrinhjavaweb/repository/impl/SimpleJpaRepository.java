@@ -1,5 +1,6 @@
 package com.laptrinhjavaweb.repository.impl;
 
+import com.laptrinhjavaweb.annotation.Column;
 import com.laptrinhjavaweb.annotation.Entity;
 import com.laptrinhjavaweb.annotation.Table;
 import com.laptrinhjavaweb.mapper.ResultSetMapper;
@@ -8,6 +9,7 @@ import com.laptrinhjavaweb.repository.JpaRepository;
 import com.sun.javafx.collections.MappingChange;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Connection;
@@ -110,6 +112,97 @@ public class SimpleJpaRepository<T>  implements JpaRepository<T> {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public T findById(Long id) {
+        String tableName = "";
+        if (zClass.isAnnotationPresent(Table.class) && zClass.isAnnotationPresent(Entity.class) ){
+            Table table = (Table) zClass.getAnnotation(Table.class);
+            tableName = table.name();
+        }
+        String sql = "SELECT * FROM "+tableName+" WHERE id =?";
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        ResultSetMapper<T> resultSetMapper = new ResultSetMapper<>();
+        try {
+            connection = EntityManagerFactory.getConnection();
+            statement = connection.prepareStatement(sql);
+            statement.setObject(1,id);
+            rs=statement.executeQuery();
+            List<T> list = resultSetMapper.mapRow(rs,zClass);
+            return list.size()>0 ? list.get(0) : null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteById(Long id) {
+
+    }
+
+    @Override
+    public Long insert(Object t) {
+        return null;
+    }
+
+    @Override
+    public void update(Object t) {
+
+    }
+    private String createSqlInsert(){
+        String tableName = "";
+        if (zClass.isAnnotationPresent(Table.class) && zClass.isAnnotationPresent(Entity.class) ){
+            Table table = (Table) zClass.getAnnotation(Table.class);
+            tableName = table.name();
+        }
+        Field[] fieldChild = zClass.getDeclaredFields();
+        StringBuilder fields = new StringBuilder("");
+        StringBuilder params = new StringBuilder("");
+        for (Field field : fieldChild){
+            if (field.isAnnotationPresent(Column.class)){
+                Column column = field.getAnnotation(Column.class);
+                if (fields.length()>1){
+                    fields.append(",");
+                    fields.append(column.name());
+                    params.append(",?");
+                }else {
+                    fields.append(column.name());
+                    params.append("?");
+                }
+            }
+        }
+        Class<?> parentClass = zClass.getSuperclass();
+        while (parentClass != null){
+            for (Field field : parentClass.getDeclaredFields()){
+                if (field.isAnnotationPresent(Column.class)){
+                    Column column = field.getAnnotation(Column.class);
+                    if (fields.length()>1){
+                        fields.append(",");
+                        fields.append(column.name());
+                        params.append(",?");
+                    }else {
+                        fields.append(column.name());
+                        params.append("?");
+                    }
+                }
+            }
+            parentClass = parentClass.getSuperclass();
+        }
+        String sql = "INSERT INTO "+tableName+ " ("+fields.toString()+") VALUES("+params.toString()+")";
+        return sql;
+    }
+    private String createSqlUpdate(){
+        String tableName = "";
+        if (zClass.isAnnotationPresent(Table.class) && zClass.isAnnotationPresent(Entity.class) ){
+            Table table = (Table) zClass.getAnnotation(Table.class);
+            tableName = table.name();
+        }
+        String sql = "";
+        return sql;
     }
     protected StringBuilder createSqlFindAll(StringBuilder where, Map<String,Object> propeties){
         if (propeties!=null && propeties.size()>0){

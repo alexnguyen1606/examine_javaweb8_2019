@@ -12,12 +12,6 @@ import java.util.Map;
 public class CustomerRepository extends SimpleJpaRepository<CustomerEntity> implements ICustomerRepository {
 
     @Override
-    public List<CustomerEntity> findAll(Pageable pageable) {
-        String a ="";
-        return this.findAll(pageable,a);
-    }
-
-    @Override
     public List<CustomerEntity> findAll(Map<String,Object> properties, Pageable pageable, CustomerSearchBuilder builder) {
         StringBuilder where = new StringBuilder(" Select * from customer AS A");
         String sqlSpecial =buildSqlSpecial(builder);
