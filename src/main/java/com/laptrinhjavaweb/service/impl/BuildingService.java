@@ -59,7 +59,22 @@ public class BuildingService implements IBuildingService {
 
     @Override
     public BuildingDTO update(BuildingDTO buildingDTO) {
-        return null;
+        if (buildingDTO.getId() == null){
+            return new BuildingDTO();
+        }else {
+            BuildingEntity buildingEntity = converter.covertToEntity(buildingDTO);
+            BuildingEntity buildingEntityInDB = buildingRepository.findById(buildingEntity.getId());
+
+            buildingEntity.setModifiedDate(new Date());
+            buildingEntity.setModifiedBy("abc");
+            buildingEntity.setCreatedDate(buildingEntityInDB.getCreatedDate());
+            buildingEntity.setCreatedBy(buildingEntityInDB.getCreatedBy());
+
+            buildingRepository.update(buildingEntity);
+
+            return findOne(buildingDTO.getId());
+        }
+
     }
 
     @Override

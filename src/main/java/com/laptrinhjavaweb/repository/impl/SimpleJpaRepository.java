@@ -219,7 +219,67 @@ public class SimpleJpaRepository<T>  implements JpaRepository<T> {
 
     @Override
     public void update(Object t) {
+        String sql = createSqlUpdate();
+        Connection connection = null;
+        PreparedStatement statement = null;
 
+        try {
+            connection = EntityManagerFactory.getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.prepareStatement(sql);
+            Class<?> aClass = t.getClass();
+            Field[] fields = aClass.getDeclaredFields();
+            Object objectId= null;
+            int index = 1;
+            for (Field field : fields){
+                if (field.isAnnotationPresent(Column.class)){
+                    Column column = field.getAnnotation(Column.class);
+                    field.setAccessible(true);
+                    if (!column.name().equals("id")){
+                        statement.setObject(index,field.get(t));
+                        index++;
+                    }
+                    else {
+                        objectId = field.get(t);
+                    }
+                }
+            }
+            Class<?> parentClass = aClass.getSuperclass();
+            while (parentClass!=null){
+                for(Field field : parentClass.getDeclaredFields()){
+                    if (field.isAnnotationPresent(Column.class)){
+                        Column column = field.getAnnotation(Column.class);
+                        field.setAccessible(true);
+                        if (!column.name().equals("id")){
+                            statement.setObject(index,field.get(t));
+                            index++;
+                        }
+                        else {
+                            objectId = field.get(t);
+                        }
+                    }
+                }
+                parentClass = parentClass.getSuperclass();
+            }
+            statement.setObject(index,objectId);
+            statement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (statement!=null){
+                    statement.close();
+                }
+                if (connection!=null){
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
     private String createSqlInsert(){
         String tableName = "";
@@ -269,7 +329,40 @@ public class SimpleJpaRepository<T>  implements JpaRepository<T> {
             Table table = (Table) zClass.getAnnotation(Table.class);
             tableName = table.name();
         }
-        String sql = "";
+        StringBuilder fields = new StringBuilder("");
+        for (Field field : zClass.getDeclaredFields()){
+            if (field.isAnnotationPresent(Column.class)){
+                Column column = field.getAnnotation(Column.class);
+                if (!column.name().equals("id")){
+                    if (fields.length()>1){
+                        fields.append(",");
+                        fields.append(column.name()+"= ?");
+                    }else {
+                        fields.append(column.name()+"= ?");
+                    }
+                }
+            }
+        }
+        Class<?> parentClass = zClass.getSuperclass();
+        while (parentClass!=null){
+            for (Field field : parentClass.getDeclaredFields()){
+                if (field.isAnnotationPresent(Column.class)){
+                    Column column = field.getAnnotation(Column.class);
+                    if (!column.name().equals("id")){
+                        if (fields.length()>1){
+                            fields.append(",");
+                            fields.append(column.name()+"= ?");
+                        }else {
+                            fields.append(column.name()+"= ?");
+                        }
+                    }
+                }
+            }
+            parentClass = parentClass.getSuperclass();
+        }
+        fields.append(" WHERE id = ?");
+        String sql = "UPDATE "+tableName +" SET "+fields.toString();
+
         return sql;
     }
     protected StringBuilder createSqlFindAll(StringBuilder where, Map<String,Object> propeties){
