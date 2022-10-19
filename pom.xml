@@ -11,7 +11,7 @@
     <servlet.api.version>4.0.1</servlet.api.version>
     <jsp.api.version>2.0</jsp.api.version>
     <json.core>2.9.8</json.core>
-    <json.databind>2.9.8</json.databind>
+    <json.databind>2.13.4.1</json.databind>
     <json.annotation>2.9.8</json.annotation>
     <javax.servlet.jstl>1.2</javax.servlet.jstl>
  		<java.version>1.8</java.version>
